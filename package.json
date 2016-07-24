@@ -1,0 +1,25 @@
+{
+  "name": "friskis-js-api-wrapper",
+  "version": "1.0.0",
+  "description": "Friskis &amp; Svettis Uppsala JS API wrapper",
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha -r babel-core/register -C $(find lib -name '*.spec.js')",
+    "test:watch": "npm run test -- -w --growl"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/gish/friskis-js-api-wrapper.git"
+  },
+  "author": "Erik Hedberg <erik@hedberg.at>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/gish/friskis-js-api-wrapper/issues"
+  },
+  "homepage": "https://github.com/gish/friskis-js-api-wrapper#readme",
+  "devDependencies": {
+    "babel-preset-es2015": "^6.9.0",
+    "expect": "^1.20.2",
+    "mocha": "^2.5.3"
+  }
+}
