@@ -27,5 +27,15 @@
   },
   "dependencies": {
     "request": "^2.74.0"
+  },
+  "standard": {
+    "globals": [
+      "describe",
+      "it",
+      "before",
+      "after",
+      "beforeEach",
+      "afterEach"
+    ]
   }
 }
