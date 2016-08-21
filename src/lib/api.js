@@ -26,81 +26,77 @@ const doApiRequest = (method, url, apikey, username, password, qs) => {
   })
 }
 
-const FriskisSvettisApi = {
-  getAuthToken (options) {
-    const {
-      apikey,
-      username,
-      password
-    } = options
-    const url = `${baseUrl}/persons.json`
-    const method = 'GET'
 
-    return new Promise((resolve, reject) => {
-      doApiRequest(method, url, apikey, username, password, {
-        requestauthtoken: true
-      })
-      .then((body) => {
-        const authToken = body.persons[0].authtoken
-        resolve(authToken)
-      })
-    })
-  },
-  getActivities (options) {
-    const {
-      apikey,
-      username,
-      password,
-      startDate,
-      endDate,
-      businessunitids,
-      includeBooking
-    } = options
-    const url = `${baseUrl}/activities.json`
-    const method = 'GET'
 
-    return doApiRequest(method, url, apikey, username, password, {
-      businessunitids: businessunitids,
-      startdate: startDate,
-      enddate: endDate,
-      includebooking: includeBooking
-    })
-  },
-  createBooking (options) {
+const apiHandler = (options) => {
     const {
-      apikey,
-      username,
-      password,
-      activityid
+        username,
+        password,
+        apikey
     } = options
-    const url = `${baseUrl}/activitybookings.json`
-    const method = 'POST'
 
-    return doApiRequest(method, url, apikey, username, password, {
-      activityid
-    })
-  },
-  deleteBooking (options) {
-    const {
-      apikey,
-      username,
-      password,
-      id,
-      type
-    } = options
-    const url = `${baseUrl}/activitybookings.json`
-    const method = 'DELETE'
+    return {
+      getAuthToken (options) {
+        const url = `${baseUrl}/persons.json`
+        const method = 'GET'
 
-    return doApiRequest(method, url, apikey, username, password, {
-      id,
-      type
-    })
-  },
-  getBookings (options) {
-    return new Promise((resolve, reject) => {
-      reject('not implemented')
-    })
-  }
+        return new Promise((resolve, reject) => {
+          doApiRequest(method, url, apikey, username, password, {
+            requestauthtoken: true
+          })
+          .then((body) => {
+            const authToken = body.persons[0].authtoken
+            resolve(authToken)
+          })
+        })
+      },
+      getActivities (options) {
+        const {
+          startdate,
+          enddate,
+          businessunitids,
+          includeBooking
+        } = options
+        const url = `${baseUrl}/activities.json`
+        const method = 'GET'
+
+        return doApiRequest(method, url, apikey, username, password, {
+          businessunitids: businessunitids,
+          startdate: startdate,
+          enddate: enddate,
+          includebooking: includeBooking
+        })
+      },
+      createBooking (options) {
+        const {
+          activityid
+        } = options
+        const url = `${baseUrl}/activitybookings.json`
+        const method = 'POST'
+
+        return doApiRequest(method, url, apikey, username, password, {
+          activityid
+        })
+      },
+      deleteBooking (options) {
+        const {
+          id,
+          type
+        } = options
+        const url = `${baseUrl}/activitybookings.json`
+        const method = 'DELETE'
+
+        return doApiRequest(method, url, apikey, username, password, {
+          id,
+          type
+        })
+      },
+      getBookings (options) {
+        return new Promise((resolve, reject) => {
+          reject('not implemented')
+        })
+      }
+    }
 }
 
-export default FriskisSvettisApi
+export default apiHandler

@@ -5,25 +5,22 @@ import FriskisSvettisApi from './api.js'
 
 dotenv.config()
 
+let apiHandler
+
 const getActivities = (credentials) => {
-  const startDate = moment().add(2, 'days').format('YYYY-MM-DD')
-  const endDate = moment().add(5, 'days').format('YYYY-MM-DD')
+  const startdate = moment().add(2, 'days').format('YYYY-MM-DD')
+  const enddate = moment().add(5, 'days').format('YYYY-MM-DD')
   const businessunitids = '1'
   const { username, password, apikey } = credentials
 
-  return FriskisSvettisApi.getActivities({
-    apikey,
-    username,
-    password,
+  return apiHandler.getActivities({
     businessunitids,
-    startDate,
-    endDate
+    startdate,
+    enddate
   })
 }
 
 const bookActivity = (credentials) => {
-  const { username, password, apikey } = credentials
-
   return getActivities(credentials)
   .then((response) => {
     const bookableActivity = response.activities.activity.find((activity) => {
@@ -32,10 +29,7 @@ const bookActivity = (credentials) => {
     return bookableActivity.id
   })
   .then((activityid) => {
-    return FriskisSvettisApi.createBooking({
-      apikey,
-      username,
-      password,
+    return apiHandler.createBooking({
       activityid
     })
   })
@@ -50,7 +44,12 @@ describe('Friskis', () => {
       password: process.env.PASSWORD,
       apikey: process.env.APIKEY
     }
-  })
+    apiHandler = FriskisSvettisApi({
+      username: credentials.username,
+      password: credentials.password,
+      apikey: credentials.apikey
+    })
+ })
 
   describe('Credentials', () => {
     it('should have username', () => assert(credentials.username))
@@ -60,15 +59,8 @@ describe('Friskis', () => {
 
   describe('Auth token', () => {
     it('should return auth token', () => {
-      // given
-      const { username, password, apikey } = credentials
-
       // when
-      return FriskisSvettisApi.getAuthToken({
-        apikey: apikey,
-        username: username,
-        password: password
-      })
+      return apiHandler.getAuthToken()
       .then((authToken) => {
         // then
         assert(authToken.length > 0)
@@ -115,14 +107,10 @@ describe('Friskis', () => {
         return // Failed created booking, possibly timeout. Let's bail
       }
 
-      const { username, password, apikey } = credentials
       const id = createdBooking.activitybooking.id
       const type = 'ordinary'
 
-      return FriskisSvettisApi.deleteBooking({
-        apikey,
-        username,
-        password,
+      return apiHandler.deleteBooking({
         id,
         type
       })
@@ -149,14 +137,10 @@ describe('Friskis', () => {
     })
 
     it('should have empty response deleting given booking', () => {
-      const { username, password, apikey } = credentials
       const id = createdBooking.activitybooking.id
       const type = 'ordinary'
 
-      return FriskisSvettisApi.deleteBooking({
-        apikey,
-        username,
-        password,
+      return apiHandler.deleteBooking({
         id,
         type
       })
