@@ -17,8 +17,8 @@ const doApiRequest = (method, url, apikey, username, password, qs) => {
       },
       qs: queryString
     }, (error, response, body) => {
-      if (error || body.error) {
-        reject(error.body || body.error)
+      if (error || body.errors) {
+        reject(error.body || body.errors)
       } else {
         resolve(JSON.parse(body || '{}'))
       }
@@ -49,45 +49,22 @@ const apiHandler = (options) => {
       })
     },
     getActivities (options) {
-      const {
-        startdate,
-        enddate,
-        businessunitids,
-        includeBooking
-      } = options
       const url = `${baseUrl}/activities.json`
       const method = 'GET'
 
-      return doApiRequest(method, url, apikey, username, password, {
-        businessunitids: businessunitids,
-        startdate: startdate,
-        enddate: enddate,
-        includebooking: includeBooking
-      })
+      return doApiRequest(method, url, apikey, username, password, options)
     },
     createBooking (options) {
-      const {
-        activityid
-      } = options
       const url = `${baseUrl}/activitybookings.json`
       const method = 'POST'
 
-      return doApiRequest(method, url, apikey, username, password, {
-        activityid
-      })
+      return doApiRequest(method, url, apikey, username, password, options)
     },
     deleteBooking (options) {
-      const {
-        id,
-        type
-      } = options
       const url = `${baseUrl}/activitybookings.json`
       const method = 'DELETE'
 
-      return doApiRequest(method, url, apikey, username, password, {
-        id,
-        type
-      })
+      return doApiRequest(method, url, apikey, username, password, options)
     },
     getBookings (options) {
       return new Promise((resolve, reject) => {
