@@ -1,6 +1,6 @@
 {
   "name": "friskis-js-api-wrapper",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "Friskis &amp; Svettis Uppsala JS API wrapper",
   "main": "dist/index.js",
   "scripts": {
