@@ -17,10 +17,16 @@ const doApiRequest = (method, url, apikey, username, password, qs) => {
       },
       qs: queryString
     }, (error, response, body) => {
-      if (error || body.errors) {
-        reject(error.body || body.errors)
+      const parsedBody = JSON.parse(body || '{}')
+
+      if (error) {
+        reject(error)
+      } else if (parsedBody.errors) {
+        const errors = parsedBody.errors
+        const message = errors[0].message
+        reject(new Error(message))
       } else {
-        resolve(JSON.parse(body || '{}'))
+        resolve(parsedBody)
       }
     })
   })
@@ -67,9 +73,10 @@ const apiHandler = (options) => {
       return doApiRequest(method, url, apikey, username, password, options)
     },
     getBookings (options) {
-      return new Promise((resolve, reject) => {
-        reject('not implemented')
-      })
+      const url = `${baseUrl}/activitybookings.json`
+      const method = 'GET'
+
+      return doApiRequest(method, url, apikey, username, password, options)
     }
   }
 }

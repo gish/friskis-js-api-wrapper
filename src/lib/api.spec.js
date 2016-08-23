@@ -5,13 +5,23 @@ import FriskisSvettisApi from './api.js'
 
 dotenv.config()
 
-let apiHandler
+const credentials = {
+  username: process.env.USERNAME,
+  password: process.env.PASSWORD,
+  apikey: process.env.APIKEY
+}
+const apiHandler = FriskisSvettisApi({
+  username: credentials.username,
+  password: credentials.password,
+  apikey: credentials.apikey
+})
 
-const getActivities = (credentials) => {
+const timeout = 30 * 1E3
+
+const getActivities = () => {
   const startdate = moment().add(2, 'days').format('YYYY-MM-DD')
   const enddate = moment().add(5, 'days').format('YYYY-MM-DD')
   const businessunitids = '1'
-  const { username, password, apikey } = credentials
 
   return apiHandler.getActivities({
     businessunitids,
@@ -20,8 +30,8 @@ const getActivities = (credentials) => {
   })
 }
 
-const bookActivity = (credentials) => {
-  return getActivities(credentials)
+const bookActivity = () => {
+  return getActivities()
   .then((response) => {
     const bookableActivity = response.activities.activity.find((activity) => {
       return activity.bookableslots > 0
@@ -35,21 +45,34 @@ const bookActivity = (credentials) => {
   })
 }
 
-describe('Friskis', () => {
-  let credentials
+const getBookings = () => {
+  const startdate = moment().add(2, 'days').format('YYYY-MM-DD')
+  const enddate = moment().add(5, 'days').format('YYYY-MM-DD')
+  const type = 'ordinary'
 
-  before(() => {
-    credentials = {
-      username: process.env.USERNAME,
-      password: process.env.PASSWORD,
-      apikey: process.env.APIKEY
-    }
-    apiHandler = FriskisSvettisApi({
-      username: credentials.username,
-      password: credentials.password,
-      apikey: credentials.apikey
-    })
- })
+  return apiHandler.getBookings({
+    startdate,
+    enddate,
+    type
+  })
+}
+
+const deleteBooking = (booking) => {
+  if (!booking) {
+    return // Failed created booking, possibly timeout. Let's bail
+  }
+
+  const id = booking.activitybooking.id
+  const type = 'ordinary'
+
+  return apiHandler.deleteBooking({
+    id,
+    type
+  })
+}
+
+describe('Friskis', function () {
+  this.timeout(timeout)
 
   describe('Credentials', () => {
     it('should have username', () => assert(credentials.username))
@@ -96,24 +119,14 @@ describe('Friskis', () => {
     let createdBooking
 
     before(() => {
-      return bookActivity(credentials)
+      return bookActivity()
       .then((booking) => {
         createdBooking = booking
       })
     })
 
     after(() => {
-      if (!createdBooking) {
-        return // Failed created booking, possibly timeout. Let's bail
-      }
-
-      const id = createdBooking.activitybooking.id
-      const type = 'ordinary'
-
-      return apiHandler.deleteBooking({
-        id,
-        type
-      })
+      deleteBooking(createdBooking)
     })
 
     it('should get activity id when booked', () => {
@@ -130,7 +143,7 @@ describe('Friskis', () => {
     let createdBooking
 
     before(() => {
-      return bookActivity(credentials)
+      return bookActivity()
       .then((booking) => {
         createdBooking = booking
       })
@@ -151,5 +164,31 @@ describe('Friskis', () => {
       })
     })
   })
-  it('should get bookings', () => {})
+
+  describe('Get activity bookings', () => {
+    let createdBooking
+    let bookedActivities
+
+    before(() => {
+      return bookActivity()
+      .then((booking) => {
+        createdBooking = booking
+        return getBookings()
+      })
+      .then((bookings) => {
+        bookedActivities = bookings
+      })
+    })
+
+    after(() => {
+      deleteBooking(createdBooking)
+    })
+
+    it('should have at least one activitybooking', () => {
+      const expected = 1
+      const actual = bookedActivities.activitybookings.activitybooking.length
+
+      assert(actual >= expected)
+    })
+  })
 })
